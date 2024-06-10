@@ -144,7 +144,7 @@ void * Nurse( void * arg )
 	#endif
 
 
-    while( vails_available() )
+    while( vails_available() && is_client_available() )
 	{
 		update_vail_count();	
 		update_client_count();
