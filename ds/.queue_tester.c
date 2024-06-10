@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "QueueBuffer.h"
+#include "queue.h"
 
 
 int main( void )

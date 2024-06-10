@@ -1,8 +1,9 @@
-#include <string.h>
+#include <memory.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <assert.h>
 
-#include "QueueBuffer.h"
+#include "queue.h"
 
 /// @brief Instantiate the queue with the given size
 /// @param queue Pointer to queue ds
@@ -129,4 +130,96 @@ void ViewContents( QueueBuffer_t q )
         size--;
     }
     printf("\n------------------------------------------\n\n");
+}
+
+// ---------------------------- Queue Instantiation ----------------------------
+
+static void node_detach( queue_node_t* node )
+{
+    queue_node_t *p = node->prev, *n = node->next;
+    if( p) p->next = n;
+    if(n) n->prev = p;
+    node->prev = node->next = NULL;
+}
+
+queue_node_t* queue_node_alloc( uint32_t data )
+{
+    queue_node_t* newNode = (queue_node_t*) calloc(1, sizeof(queue_node_t));
+    newNode->next = newNode->prev = NULL;
+    newNode->data = data;
+    return newNode;
+}
+
+void queue_node_dealloc( queue_node_t* node )
+{
+    assert(node);
+    node_detach( node );
+    free( node );
+}
+
+void queue_init( queue_t* queue )
+{
+    assert( queue );
+    queue->head = queue->tail = NULL;
+    queue->size = 0;
+}
+
+void queue_append( queue_t* queue, uint32_t val )
+{
+    assert(queue);
+    queue_node_t* temp = queue_node_alloc( val );
+    if( !queue->head )
+    {
+        assert( !queue->size );
+        queue->head = queue->tail = temp;
+    }
+    else
+    {
+        queue->tail->next = temp;
+        temp->prev = queue->tail;
+        queue->tail = temp;
+    }
+    queue->size++;
+}
+
+uint32_t queue_get_top( queue_t* queue )
+{
+    assert( queue );
+    if( queue_empty(queue) ) exit(-1);
+    return queue->head->data;
+}
+
+uint32_t queue_pop( queue_t* queue )
+{
+    assert( queue );
+    if( queue_empty(queue) ) exit(-1);
+    queue_node_t* temp = queue->head;
+    queue->head = queue->head->next;
+    queue->size--;
+    assert( queue->size >= 0 );
+    if( queue->size == 0 )
+    {
+        queue->head = queue->tail = NULL;
+    }
+    int val = temp->data;
+    queue_node_dealloc( temp );
+    temp = NULL;
+    return val;
+}
+
+bool queue_empty( queue_t* queue )
+{
+    assert(queue);
+    return queue->size == 0;
+}
+
+void queue_clean( queue_t* queue )
+{
+    queue_node_t* curr = queue->head;
+    while( curr )
+    {
+        queue->head = queue->head->next;
+        queue_node_dealloc( curr );
+        curr = queue->head;
+    }
 }
