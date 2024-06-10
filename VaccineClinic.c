@@ -206,13 +206,7 @@ void * Nurse( void * arg )
 			#endif
 
 			int iter = 5;
-			while( iter )
-			{
-				printf(".");
-				sleep(1);
-				iter--;
-			}
-			printf("\n");
+			printf(".....\n");
 
 			// mark that nurse is done
 			lookup_buffer_set( &nurse_done_station, station, true );
